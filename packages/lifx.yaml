@@ -1,0 +1,17 @@
+sensor:
+  - platform: template
+    sensors:
+      lifx332f69:
+        friendly_name: Lounge LIFX
+        value_template: >
+          {% if is_state('device_tracker.LIFX332F69', 'home') %}
+            Connected
+          {% else %}
+            !no-reply, please check!
+          {% endif %}
+        icon_template: >
+          {% if is_state('device_tracker.LIFX332F69', 'home') %}
+            mdi:lightbulb-on-outline
+          {% else %}
+            mdi:lightbulb-outline
+          {% endif %}

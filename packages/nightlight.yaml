@@ -1,0 +1,47 @@
+input_number:
+
+  lux_slider:
+    name: 'Nightlight lux'
+    unit_of_measurement: lux
+    min: 0
+    max: 15
+    step: 1
+
+automation:
+- id: '1553507967547'
+  alias: Night Light Stairs
+  trigger:
+  - platform: template
+    value_template: "{{ is_state('binary_sensor.motion_sensor_stair_bottom', 'on') or is_state('binary_sensor.motion_sensor_stair_top', 'on')}}"
+  condition:
+  - condition: template
+    value_template: "{{ states('sensor.motion_sensor_stair_bottom')|float < states('input_number.lux_slider')| int and states('sensor.motion_sensor_stair_top')|float < states('input_number.lux_slider')| int}}"
+  action:
+  - data:
+      entity_id: light.upstairs_welcome_light
+    service: light.turn_on
+  - wait_template:  "{{ is_state('binary_sensor.motion_sensor_stair_bottom', 'off') and is_state('binary_sensor.motion_sensor_stair_top', 'off') }}"
+  - data:
+      entity_id: light.upstairs_welcome_light
+    service: light.turn_off
+
+- id: '1553507967548'
+  alias: Night Light Lounge
+  trigger:
+  - platform: template
+    value_template: "{{ is_state('binary_sensor.motion_sensor_lounge', 'on')}}"
+  condition:
+  - condition: template
+    value_template: "{{ states('sensor.motion_sensor_lounge')|float < states('input_number.lux_slider')| int }}"
+  - condition: state
+    entity_id: media_player.living_room_tv
+    state: "off"
+  action:
+  - data:
+      entity_id: light.lifx_welcome_light
+    service: light.turn_on
+  - wait_template:  "{{ is_state('binary_sensor.motion_sensor_lounge', 'off') }}"
+  - data:
+      entity_id: light.lifx_welcome_light
+    service: light.turn_off
+

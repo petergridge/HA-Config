@@ -1,0 +1,100 @@
+automation:
+
+    - id: HomeGarageAlert
+      alias: HomeGarageAlert
+      trigger:
+      - platform: time_pattern
+        minutes: '/15'
+      condition:
+#      - condition: template
+#        value_template: '{{ states.person.peter.state != ''home'' }}'
+      - condition: state
+        entity_id: cover.garage_door
+        state: open
+      action:
+        service: notify.mobile_app_sm_g965f
+        data_template:
+          message: 'garage door is open'
+
+camera:
+  - platform: foscam
+    name: garage_cam
+    ip: 192.168.1.104
+    username: !secret camera_user
+    password: !secret camera_password
+
+sensor:
+
+
+
+  - platform: template
+    sensors:
+      
+#      garage_cctv:
+#        friendly_name: Garage Camera
+#        value_template: >
+#          {% if is_state('device_tracker.garage_cctv', 'home') %}
+#            Connected
+#          {% else %}
+#            offline, check!
+#          {% endif %}
+#        icon_template: >
+#          {% if is_state('device_tracker.garage_cctv', 'home') %}
+#            mdi:cctv
+#          {% else %}
+#            mdi:camera-off
+#          {% endif %}
+
+      tmpl_garage_open_changed:
+        friendly_name: "Garage Door"
+        value_template: '{% if states.cover.garage_door.last_changed %}
+             {{ ((as_timestamp(states.cover.garage_door.last_changed)) | timestamp_custom("%d/%m/%y %H:%M")) }}
+             {% endif %}'
+
+      tmpl_garage_motion_changed:
+        friendly_name: "Garage Motion"
+        value_template: '{% if states.binary_sensor.garage_motion.last_changed %}
+             {{ ((as_timestamp(states.binary_sensor.garage_motion.last_changed)) | timestamp_custom("%d/%m/%y %H:%M")) }}
+             {% endif %}'
+
+binary_sensor:
+
+  - platform: template
+    sensors:
+       garage:
+        friendly_name: "Garage Door"
+        device_class: door
+#        entity_id: cover.garage_door
+        value_template: >-
+          {{ is_state('cover.garage_door', 'open') }}
+        icon_template: >-
+          {% if is_state('cover.garage_door', 'open') %}
+            mdi:garage-open
+          {% else %}
+            mdi:garage
+          {% endif %}        
+
+  - platform: rest
+    name: garage_motion
+    #resource: https://192.168.1.104:443/cgi-bin/CGIProxy.fcgi?cmd=getDevState&usr=???&pwd=???
+    resource: !secret foscam_get_device_state
+    device_class: motion
+    scan_interval: 5
+    value_template: >-
+      {%- if "<motionDetectAlarm>2</motionDetectAlarm>" in value -%}
+        {{ true }}
+      {%- else -%}
+        {{ false }}
+      {%- endif -%}
+
+switch:
+
+  #setting camera contrast to zero so nothing is captured on an NVR etc
+  - platform: command_line
+    switches:
+     garage_camera:
+       command_off: 'curl -k "https://192.168.1.104:443/cgi-bin/CGIProxy.fcgi?cmd=setContrast&constrast=0&usr=ADMIN&pwd=Pa55word"'
+       command_on:  'curl -k "https://192.168.1.104:443/cgi-bin/CGIProxy.fcgi?cmd=setContrast&constrast=50&usr=ADMIN&pwd=Pa55word"'
+       command_state: 'curl -k --silent "http://192.168.1.104:88/cgi-bin/CGIProxy.fcgi?cmd=getImageSetting&usr=ADMIN&pwd=Pa55word" | grep -E -m1 -o "<contrast>(.*)</contrast>" | sed -e "s,.*<contrast>\([^<]*\)</contrast>.*,\1,g"'
+       value_template: '{{ value == "50" }}'
+       friendly_name: Garage Camera

@@ -1,0 +1,45 @@
+# both of these templates provide the same result water on defined days
+# "{{ now().weekday() in [0,2,4,6] }}"
+# "{{ now().strftime('%a') in ['Mon','Wed','Fri','Sun'] }}"
+#Set number of days between watering
+# water in the third day use > so it will still water on the fourth day if you have a sensor defined
+# "{{ state_attr('irrigation.morning', 'days_since') > 2 }}" # water in the third day
+# {{ states('sensor.time') == '15:44' }}
+
+irrigation:
+  
+  programs:
+  - name: Morning
+    template: "{{ states('sensor.time') == '07:30' and state_attr('irrigation.morning', 'days_since') > 2 }}"
+    icon: mdi:fountain
+    zones:
+      - zone: irrigation_zone.vege_patch
+      - zone: irrigation_zone.front_lawn
+  - name: Afternoon
+    template: "{{  states('sensor.time') == '18:15' and now().strftime('%a') in ['Mon','Tue','Wed','Thu','Fri','Sat','Sun'] }}"
+    zones:
+      - zone: irrigation_zone.vege_patch
+      - zone: irrigation_zone.front_lawn
+  - name: Midday
+    template: "{{ states('sensor.time') == '12:00' }}"
+    zones:
+      - zone: irrigation_zone.pot_plants
+      - zone: irrigation_zone.vege_patch
+      - zone: irrigation_zone.front_lawn
+
+  zones:
+  - name: Vege Patch
+    water: 1
+#    template: "{{ is_state('binary_sensor.is_wet', 'off') }}"
+    switch_entity: switch.solenoid_01
+    icon_off: 'mdi:carrot'
+  - name: Front Lawn
+    water: 1
+    switch_entity: switch.solenoid_02
+  - name: Pot Plants
+    water: 1
+    wait: 1
+    repeat: 2
+    icon_off: 'mdi:flower'
+    switch_entity: switch.solenoid_03
+

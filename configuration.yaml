@@ -1,0 +1,67 @@
+homeassistant:
+
+  packages:  !include_dir_named packages
+  customize: !include customize.yaml
+
+  auth_providers:
+    - type: homeassistant
+    - type: trusted_networks
+      trusted_networks:
+        - 192.168.1.0/24 #my network
+        - 10.8.0.0/24    #vpn
+  whitelist_external_dirs:
+    - '/share'
+    
+http:
+  base_url: !secret base_url
+  ip_ban_enabled: True
+  login_attempts_threshold: 5
+  cors_allowed_origins:
+  - https://google.com
+
+# Configure a default setup of Home Assistant (frontend, api, etc)
+#default_config:
+#automation:
+config:
+frontend:
+map:
+mobile_app:
+person:
+#script:
+ssdp:
+sun:
+system_health:
+updater:
+zeroconf:
+#cloud:
+#history
+#logbook
+
+group: !include groups.yaml
+scene: !include scenes.yaml
+
+#replaced by packages:
+automation: !include automations.yaml
+script: !include scripts.yaml
+
+recorder:
+  db_url: !secret db_url
+  purge_interval: 1
+  purge_keep_days: 10
+  include:
+    entities:
+      - sensor.speedtest_download
+      - binary_sensor.wan_ping
+
+# Enables support for tracking state changes over time
+history:
+  exclude:
+    domains:
+      - input_number
+      - input_text
+
+# Text to speech
+#tts:
+#  - platform: google_translate
+
+

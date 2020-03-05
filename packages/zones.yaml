@@ -1,0 +1,21 @@
+zone:
+  - name: Jenny's
+    latitude: -33.804456894419346
+    longitude: 151.1153624122614
+    radius: 100
+    icon: mdi:human-male-female
+  - name: Work
+    latitude: -33.8227595
+    longitude: 151.1953214
+    radius: 100
+    icon: mdi:domain
+  - name: Allan's
+    latitude: -33.7116771
+    longitude: 150.9626352
+    radius: 100
+    icon: mdi:emoticon-poop
+  - name: InStyle
+    latitude: -33.7135906
+    longitude: 150.9588258
+    radius: 100
+    icon: mdi:human-handsup

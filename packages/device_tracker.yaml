@@ -1,0 +1,214 @@
+device_tracker:
+  - platform: ping
+    hosts:
+      ping_gateway: 192.168.1.1
+      ping_switch_1: 192.168.1.253
+      ping_switch_2: 192.168.1.254
+      ping_peter: 192.168.1.121
+      ping_juliet: 192.168.1.122
+      ping_tristan: 192.168.1.123
+
+proximity:
+  home:
+    devices:
+      - device_tracker.sm_g965f
+      - device_tracker.sm_n950f
+    tolerance: 50
+    unit_of_measurement: km
+  home_juliet:
+    devices:
+      - device_tracker.sm_n950f
+    tolerance: 50
+    unit_of_measurement: km
+  home_peter:
+    devices:
+      - device_tracker.sm_g965f
+    tolerance: 50
+    unit_of_measurement: km
+  work:
+    zone: work
+    devices:
+      - device_tracker.sm_g965f
+    tolerance: 50
+    unit_of_measurement: km
+  jennys:
+    zone: jenny_s
+    devices:
+      - device_tracker.sm_g965f
+    tolerance: 50
+    unit_of_measurement: km
+  instyle:
+    zone: instyle
+    devices:
+      - device_tracker.sm_n950f
+    tolerance: 50
+    unit_of_measurement: km
+
+
+    
+#  - platform: nmap_tracker
+#    hosts: 192.168.1.0-254
+#    consider_home: 180
+#    interval_seconds: 30
+#    new_device_defaults:
+#      track_new_devices: no
+
+group:
+   all_people:
+     name: all_people
+     entities:
+       - person.peter
+       - person.juliet
+       - person.tristan
+
+
+input_number:
+  welcome_slider:
+    name: 'Welcome timeout'
+    unit_of_measurement: minutes
+    min: 0
+    max: 30
+    step: 5
+
+  near_slider:
+    name: 'Approach Warning'
+    unit_of_measurement: km's
+    min: 0
+    max: 15
+    step: 1
+
+
+automation:
+
+    - id: '1581333242932'
+      alias: New Automation
+      description: ''
+      trigger:
+      - below: '2'
+        entity_id: proximity.home_juliet
+        platform: numeric_state
+      - platform: template
+        value_template: '{{ state_attr(''proximity.home_juliet'', ''dir_of_travel'') ==
+          ''towards''}}'
+      condition:
+      - below: '2'
+        condition: numeric_state
+        entity_id: proximity.home_juliet
+      - condition: template
+        value_template: '{{ state_attr(''proximity.home_juliet'', ''dir_of_travel'') ==
+          ''towards''}}'
+      action:
+      - data:
+          message: juliet is almost home
+        service: notify.living_room_tv
+      
+    - id: WelcomeLightOn
+      alias: Welcome Light On
+      trigger:
+        platform: state
+        entity_id: group.all_people
+        to: home
+#      condition:
+#      - condition: sun
+#        after: sunset
+#        after_offset: -0:30:00
+      action:
+      - service: homeassistant.turn_on
+        entity_id: script.timed_welcome_lamp
+
+    - id: Away
+      alias: Away
+      trigger:
+        platform: state
+        entity_id: group.all_people
+        from: home
+      action:
+      - service: homeassistant.turn_on
+        entity_id: switch.garage_camera
+      - service: light.turn_off
+        data:
+          entity_id: light.fastled_ws2811_light
+      - service: light.turn_off
+        data:
+          entity_id: light.h801_light
+
+#    - id: Home
+#      alias: Home
+#      trigger:
+#        platform: state
+#        entity_id: group.all_people
+#        to: home
+#      action:
+#      - service: homeassistant.turn_off
+#        entity_id: switch.garage_camera
+
+    - id: HomeAlert
+      alias: Home Alert
+      trigger:
+        platform: state
+        entity_id: people.juliet, people.tristan, people.peter
+        to: home
+      action:
+        service: notify.living_room_tv
+        data_template:
+          message: '{{ trigger.to_state.attributes.friendly_name }} is home'
+
+    - id: HomeMsgAlert
+      alias: Home Message Alert
+      trigger:
+        platform: state
+        entity_id: people.juliet, people.tristan, people.peter
+        to: home
+#      condition:
+#      - condition: template
+#        value_template: '{{ states.people.Peter.state != ''home'' }}'
+      action:
+        service: notify.living_room_tv
+        data_template:
+          message: '{{ trigger.to_state.attributes.friendly_name }} is home'
+#        service: mqtt.publish
+#        data_template:
+#          topic: zanzito/Peter/notification
+#          payload_template: '{{ trigger.to_state.attributes.friendly_name }} is {{ trigger.to_state.state}}'
+          
+script:
+
+    timed_welcome_lamp:
+      alias: Turn on welcome lights
+      sequence:
+#      - service: light.turn_on
+#        data:
+#          entity_id: light.upstairs_welcome_light
+      - service: light.turn_on
+        data:
+          entity_id: light.fastled_ws2811_light
+          color_name: cyan
+#          effect: random
+          brightness: 255
+      - service: light.turn_on
+        data:
+          entity_id: light.h801_light
+          color_name: cyan
+#          effect: random
+          brightness: 255
+#      - service: light.turn_on
+#        data:
+#          entity_id: light.lifx_light_welcome
+#          white_level: 255
+#          brightness: 125
+
+      - delay:
+          minutes: "{{ states('input_number.welcome_slider')|int }}"
+
+      - service: light.turn_off
+        data:
+          entity_id: light.upstairs_welcome_light
+      - service: light.turn_off
+        data:
+          entity_id: light.fastled_ws2811_light
+      - service: light.turn_off
+        data:
+          entity_id: light.h801_light
+      - service: light.turn_off
+        data:
+          entity_id: light.lifx_light_welcome

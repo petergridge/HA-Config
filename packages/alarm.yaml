@@ -1,0 +1,128 @@
+alarm_control_panel:
+  - platform: manual
+    name: Alarm
+    code: !secret alarm_code
+    pending_time: 30
+    delay_time: 20
+    trigger_time: 20
+    disarmed:
+      trigger_time: 0
+    armed_home:
+      pending_time: 0
+      delay_time: 0
+
+automation:
+
+- id: trigger_armed_away
+  alias: Trigger alarm - armed away
+  trigger:
+  - entity_id: binary_sensor.open_close_front_door
+    platform: state
+    to: open
+  - entity_id: binary_sensor.open_close_back_door
+    platform: state
+    to: open
+  - entity_id: cover.garage
+    platform: state
+    to: open
+  - entity_id: binary_sensor.motion_sensor_lounge
+    platform: state
+    to: 'on'
+  - entity_id: binary_sensor.motion_sensor_stair_bottom
+    platform: state
+    to: 'on'
+  - entity_id: binary_sensor.motion_sensor_stair_top
+    platform: state
+    to: 'on'
+  condition:
+  - condition: state
+    entity_id: alarm_control_panel.alarm
+    state: armed_away
+  action:
+  - service: alarm_control_panel.alarm_trigger
+    data:
+      entity_id: alarm_control_panel.alarm
+      code: !secret alarm_code
+
+- id: alarm_away
+  alias: Alarm Arm
+  trigger:
+    platform: state
+    entity_id: group.all_people
+    to: not_home
+  action:
+  - service: alarm_control_panel.alarm_arm_away
+    data:
+      entity_id: alarm_control_panel.alarm
+      code: !secret alarm_code
+
+- id: alarm_home
+  alias: Alarm Disarm
+  trigger:
+    platform: state
+    entity_id: group.all_people
+    to: home
+  action:
+  - service: alarm_control_panel.alarm_disarm
+    data:
+      entity_id: alarm_control_panel.alarm
+      code: !secret alarm_code
+
+- id: alarm_warning
+  alias: Alarm Warning
+  trigger:
+  - platform: state
+    entity_id: alarm_control_panel.alarm
+    to: pending
+  action:
+  - service: light.turn_on
+    data:
+      entity_id: light.h801_light
+      effect: Amber
+  - service: light.turn_on
+    data:
+      entity_id: light.fastled_ws2811_light
+      effect: Amber
+
+- id: alarm_triggered
+  alias: Alarm Triggered
+  trigger:
+  - platform: state
+    entity_id: alarm_control_panel.alarm
+    to: triggered
+  action:
+  - service: light.turn_on
+    data:
+      entity_id: light.h801_light
+      effect: RedBlue
+  - service: light.turn_on
+    data:
+      entity_id: light.fastled_ws2811_light
+      effect: RedBlue
+  - service: notify.mobile_app_sm_g965f
+    data_template:
+      message: Alarm has been triggered
+  - service: notify.living_room_tv
+    data_template:
+      message: Alarm has been triggered
+
+- id: alarm_visual_alert_off
+  alias: Alarm Visual Alert Off
+  trigger:
+  - platform: state
+    entity_id: alarm_control_panel.alarm
+    to: disarmed
+  - platform: state
+    entity_id: alarm_control_panel.alarm
+    from: triggered
+    to: pending
+  - platform: state
+    entity_id: alarm_control_panel.alarm
+    to: armed_away
+  action:
+  - service: light.turn_off
+    data:
+      entity_id: light.fastled_ws2811_light
+  - service: light.turn_off
+    data:
+      entity_id: light.h801_light

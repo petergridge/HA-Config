@@ -1,0 +1,83 @@
+light:
+
+  - platform: switch
+    name: Upstairs Welcome Light
+    entity_id: switch.welcome_light
+
+switch:
+
+  - platform: broadlink_mp1
+    host: 192.168.1.106
+    mac: "34:ea:34:d1:15:fe"
+    type: mp11
+    friendly_name: "Welcome Light"
+  - platform: broadlink_mp1
+    host: 192.168.1.106
+    mac: "34:ea:34:d1:15:fe"
+    type: mp12
+    friendly_name: "Landing 2"
+  - platform: broadlink_mp1
+    host: 192.168.1.106
+    mac: "34:ea:34:d1:15:fe"
+    type: mp13
+    friendly_name: "Landing 3"
+  - platform: broadlink_mp1
+    host: 192.168.1.106
+    mac: "34:ea:34:d1:15:fe"
+    type: mp14
+    friendly_name: "Landing 4"
+
+  - platform: broadlink_mp1
+    host: 192.168.1.105
+    mac: "34:ea:34:d0:e0:a0"
+    type: mp11
+    friendly_name: "Lounge 1"
+  - platform: broadlink_mp1
+    host: 192.168.1.105
+    mac: "34:ea:34:d0:e0:a0"
+    type: mp12
+    friendly_name: "Lounge 2"
+  - platform: broadlink_mp1
+    host: 192.168.1.105
+    mac: "34:ea:34:d0:e0:a0"
+    type: mp13
+    friendly_name: "Lounge 3"
+  - platform: broadlink_mp1
+    host: 192.168.1.105
+    mac: "34:ea:34:d0:e0:a0"
+    type: mp14
+    friendly_name: "Lounge 4"
+
+#sensor:
+#  - platform: template
+#    sensors:
+#      pb1:
+#        friendly_name: Power Board 1
+#        value_template: >
+#          {% if is_state('device_tracker.broadlink_pb_1', 'home') %}
+#            Connected
+#          {% else %}
+#            !no-reply, please check!
+#          {% endif %}
+#        icon_template: >
+#          {% if is_state('device_tracker.broadlink_pb_1', 'home') %}
+#            mdi:power-plug
+#          {% else %}
+#            mdi:power-plug-off
+#          {% endif %}
+
+#      pb2:
+#        friendly_name: Power Board 2
+#        value_template: >
+#          {% if is_state('device_tracker.broadlink_pb_2', 'home') %}
+#            Connected
+#          {% else %}
+#            !no-reply, please check!
+#          {% endif %}
+#        icon_template: >
+#          {% if is_state('device_tracker.broadlink_pb_2', 'home') %}
+#            mdi:power-plug
+#          {% else %}
+#            mdi:power-plug-off
+#          {% endif %}
+          

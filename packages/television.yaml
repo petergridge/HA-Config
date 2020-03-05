@@ -1,0 +1,8 @@
+webostv:
+  host: 192.168.1.102
+  name: Living Room TV
+  customize:
+    sources:
+      - livetv
+      - PC
+

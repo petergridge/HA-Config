@@ -1,0 +1,2 @@
+binary_sensor.cosensor_em:
+  device_class: gas

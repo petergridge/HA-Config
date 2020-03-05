@@ -1,0 +1,60 @@
+
+binary_sensor:
+  - platform: workday
+    name: "Workday Sensor"
+    country: AU
+    province: NSW
+    workdays: [ mon, tue, wed, thu, fri ]
+    excludes: [ sat, sun, holiday ]
+    days_offset: 0
+
+sensor:
+  - platform: time_date
+    display_options:
+      - 'time'
+      - 'date'
+    
+automation:
+
+    - id: Start
+      alias: Start
+      trigger:
+      - event: start
+        platform: homeassistant
+      action:
+      - entity_id: switch.garage_camera
+        service: automation.trigger
+      #backup each time there is a restart
+      - service: hassio.addon_start
+        data:
+          addon: local_ftpbackup
+
+    - id: repackdb
+      alias: repackdb
+      trigger:
+        platform: time
+        at: 05:00:00
+      condition:
+        condition: time
+        weekday:
+        - sun
+      action:
+      - service: recorder.purge
+        data:
+          repack: true
+      #backup weekly
+      - service: hassio.addon_start
+        data:
+          #get this from the url of the supervisor page for this addon
+          addon: local_myftpbackup
+
+    - id: backup
+      alias: backup
+      trigger:
+        platform: time
+        at: 05:00:00
+      action:
+      - service: hassio.addon_start
+        data:
+          #get this from the url of the supervisor page for this addon
+          addon: local_ftpbackup

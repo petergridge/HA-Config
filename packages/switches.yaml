@@ -1,0 +1,72 @@
+automation:
+
+#1	x001	Hold
+#2	x002	Release (after press)
+#3	x003	Release (after hold)
+#4	x004	Double press
+#7	x007	Shake
+
+  - alias: 'Smart Switch Hold'
+    initial_state: 'on'
+    trigger:
+      platform: event
+      event_type: deconz_event
+      event_data:
+        id: smart_switch_1
+        event: 1001
+    action:
+      service: notify.living_room_tv
+      data_template:
+        message: 'Smart Switch Hold'
+
+  - alias: 'Smart Switch release after press'
+    initial_state: 'on'
+    trigger:
+      platform: event
+      event_type: deconz_event
+      event_data:
+        id: smart_switch_1
+        event: 1002
+    action:
+      service: light.toggle
+      data:
+          entity_id: light.upstairs_welcome_light
+
+  - alias: 'Smart Switch Release (after hold)'
+    initial_state: 'on'
+    trigger:
+      platform: event
+      event_type: deconz_event
+      event_data:
+        id: smart_switch_1
+        event: 1003
+    action:
+      service: notify.living_room_tv
+      data_template:
+        message: 'Smart Switch Release (after hold)'
+
+  - alias: 'Smart Switch Double press'
+    initial_state: 'on'
+    trigger:
+      platform: event
+      event_type: deconz_event
+      event_data:
+        id: smart_switch_1
+        event: 1004
+    action:
+      service: notify.living_room_tv
+      data_template:
+        message: 'Smart Switch Double press'
+
+  - alias: 'Smart Switch Shake'
+    initial_state: 'on'
+    trigger:
+      platform: event
+      event_type: deconz_event
+      event_data:
+        id: smart_switch_1
+        event: 1007
+    action:
+      service: notify.living_room_tv
+      data_template:
+        message: 'Smart Switch Shake'
